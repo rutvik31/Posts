@@ -5,27 +5,30 @@
         :cols="$vuetify.breakpoint.smAndDown ? 12 : 9"
         class="d-flex align-center"
       >
-        <span class="post-title-fonts px-2"> All User Posts </span>
-      </v-col>
-      <v-col
-        :cols="$vuetify.breakpoint.smAndDown ? 12 : 3"
-        :class="{
-          'px-4': $vuetify.breakpoint.smAndDown,
-          'pt-6 pr-7 pl-0 d-flex align-center': $vuetify.breakpoint.mdmAndUp,
-        }"
-      >
-        <v-text-field
-          v-model.trim="search"
-          outlined
-          dense
-          hide-details="auto"
-          append-icon="mdi-magnify"
-          label="Search posts"
-          clearable
-          @click:clear="clearSearch()"
-        />
+        <v-btn color="light-blue" class="px-2" @click="dialog = true">
+          Add New Post
+        </v-btn>
       </v-col>
     </v-row>
+    <v-dialog width="40vw" v-model="dialog">
+      <v-card>
+        <v-card-title> Add Post </v-card-title>
+        <v-card-text>
+          <v-text-field v-model="title" label="Title"></v-text-field>
+          <v-textarea v-model="body" label="Body" :rows="2"></v-textarea>
+          <v-text-field
+            v-model.number="userId"
+            type="number"
+            label="User ID"
+          ></v-text-field>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" @click="addNewPost()">Save</v-btn>
+          <v-btn color="secondary" @click="dialog = false">Cancel</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <v-row class="ma-0 scroll-for-postcards">
       <v-col
         cols="12"
@@ -35,10 +38,10 @@
         sm="6"
         xs="12"
         :class="{ 'px-3 pb-3 pt-6': $vuetify.breakpoint.smAndUp }"
-        v-for="(post, index) in searchPosts"
+        v-for="(post, index) in postList"
         :key="index"
       >
-        <v-card outlined @click="showDetails(post.id)">
+        <v-card outlined @click="getPostId(post.id)">
           <v-list-item three-line>
             <v-list-item-content>
               <v-list-item-title class="v-list-item-title">
@@ -56,38 +59,50 @@
 </template>
 
 <script>
+import api from "@/plugins/api";
+
 export default {
   name: "PostList",
   data() {
     return {
-      // postList: [],
+      postList: [],
+      comments: [],
       search: "",
+      title: "",
+      body: "",
+      userId: "",
+      dialog: false,
     };
   },
-  computed: {
-    postList() {
-      return this.$store.state.postList;
+  methods: {
+    addNewPost() {
+      const post = {
+        title: this.title,
+        body: this.body,
+        userId: this.userId,
+      };
+      api.posts.createPostObject(post).then((res) => {
+        console.log(res.data.data);
+      });
+      this.dialog = false;
     },
-    searchPosts() {
-      return this.postList.filter((post) => {
-        if (!this.search) return true;
-        return (
-          post.title.toLowerCase().indexOf(this.search.toLowerCase()) > -1 ||
-          post.body.toLowerCase().indexOf(this.search.toLowerCase()) > -1
-        );
+    getPostList() {
+      api.posts.getList().then((res) => {
+        this.postList = res.data;
       });
     },
-  },
-  methods: {
-    getPostList() {
-      this.$store.dispatch("getPostList");
+    showCommentsDetails(id) {
+      api.posts.getPostCommentObject(id).then((res) => {
+        this.comments = res.data;
+      });
     },
-    showDetails(id) {
-      this.$router.push(`/post/${id}`);
-    },
-    clearSearch() {
-      this.search = "";
-      this.getPostList();
+    getPostId(id) {
+      this.$router.push({
+        name: "post-details",
+        params: {
+          id: id,
+        },
+      });
     },
   },
   mounted() {

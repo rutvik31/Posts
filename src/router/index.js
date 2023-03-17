@@ -2,14 +2,14 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import List from '../pages/post/list.vue'
 import Details from '../pages/post/details.vue'
-import Comments from '../pages/post/comments.vue'
+import Login from '../pages/post/login.vue'
 
 Vue.use(VueRouter)
 
 const routes = [
   {
     path: '/',
-    redirect: '/post'
+    redirect: '/login'
   },
   {
     path: '/post',
@@ -18,13 +18,13 @@ const routes = [
   },
   {
     path: '/post/:id',
-    name: 'postDetails',
+    name: 'post-details',
     component: Details
   },
   {
-    path: '/post/:id/comments',
-    name: 'postComments',
-    component: Comments
+    path: '/login',
+    name: 'user-login',
+    component: Login
   }
 ]
 
