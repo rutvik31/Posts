@@ -14,17 +14,27 @@
       <v-card>
         <v-card-title> Add Post </v-card-title>
         <v-card-text>
-          <v-text-field v-model="title" label="Title"></v-text-field>
-          <v-textarea v-model="body" label="Body" :rows="2"></v-textarea>
-          <v-text-field
-            v-model.number="userId"
-            type="number"
-            label="User ID"
-          ></v-text-field>
+          <v-form v-model="isValid">
+            <v-text-field
+              :rules="[(v) => !!v || 'Name is required']"
+              v-model="title"
+              label="Title"
+              required
+            ></v-text-field>
+            <v-textarea
+              v-model="body"
+              :rules="[(v) => !!v || 'Name is required']"
+              label="Body"
+              :rows="2"
+              required
+            ></v-textarea>
+          </v-form>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="primary" @click="addNewPost()">Save</v-btn>
+          <v-btn :disabled="!isValid" color="primary" @click="addNewPost()"
+            >Save</v-btn
+          >
           <v-btn color="secondary" @click="dialog = false">Cancel</v-btn>
         </v-card-actions>
       </v-card>
@@ -55,6 +65,14 @@
         </v-card>
       </v-col>
     </v-row>
+    <v-snackbar v-model="snackbar" aria-multiline="true" timeout="5000" top>
+      New Post Added Successfully.<br />
+      <template v-slot:action="{ attrs }">
+        <v-btn color="red" text v-bind="attrs" @click="snackbar = false">
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
   </div>
 </template>
 
@@ -70,19 +88,23 @@ export default {
       search: "",
       title: "",
       body: "",
-      userId: "",
       dialog: false,
+      snackbar: false,
+      isValid: false,
     };
   },
   methods: {
     addNewPost() {
+      const userEmailId = localStorage.getItem("isAuthenticated");
       const post = {
         title: this.title,
         body: this.body,
-        userId: this.userId,
+        userId: userEmailId,
       };
+
       api.posts.createPostObject(post).then((res) => {
-        console.log(res.data.data);
+        this.snackbar = true;
+        console.log(res.data);
       });
       this.dialog = false;
     },

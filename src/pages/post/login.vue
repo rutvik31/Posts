@@ -20,9 +20,8 @@
 </template>
 
 <script>
-
-import { mapState } from 'vuex';
-import store from '@/store';
+import { mapState } from "vuex";
+import store from "@/store";
 
 export default {
   data() {
@@ -32,12 +31,13 @@ export default {
     };
   },
   computed: {
-    ...mapState(['emailList','loggedIn']),
+    ...mapState(["emailList", "loggedIn"]),
   },
   methods: {
     login() {
       if (this.emailList.includes(this.email)) {
         store.commit("login");
+        localStorage.setItem("isAuthenticated", this.email);
         this.$router.push({
           name: "post",
         });

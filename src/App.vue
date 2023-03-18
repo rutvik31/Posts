@@ -26,6 +26,7 @@ export default {
   }),
   methods: {
     toLoginPage() {
+      localStorage.clear();
       this.$router.push({
         name: "user-login"
       });
