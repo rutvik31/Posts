@@ -25,11 +25,14 @@ export default new Vuex.Store({
     addComment(state, data) {
       state.postComments.push(data);
     },
-    setComments(state,data) {
+    setComments(state, data) {
       state.postComments = data;
-    }
+    },
   },
   actions: {
+    newCommentAdded() {
+      localStorage.getItem();
+    },
   },
   modules: {},
 });

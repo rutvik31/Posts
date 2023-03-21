@@ -48,10 +48,10 @@
         sm="6"
         xs="12"
         :class="{ 'px-3 pb-3 pt-6': $vuetify.breakpoint.smAndUp }"
-        v-for="(post, index) in postList"
+        v-for="(post, index) in postList.slice().reverse()"
         :key="index"
       >
-        <v-card outlined @click="getPostId(post.id)">
+        <v-card outlined @click="getPostId(post)">
           <v-list-item three-line>
             <v-list-item-content>
               <v-list-item-title class="v-list-item-title">
@@ -100,17 +100,22 @@ export default {
         title: this.title,
         body: this.body,
         userId: userEmailId,
+        new: true,
       };
-
       api.posts.createPostObject(post).then((res) => {
         this.snackbar = true;
-        console.log(res.data);
+        let postList = JSON.parse(localStorage.getItem("postList")) || [];
+        postList.push(res.data);
+        localStorage.setItem("postList", JSON.stringify(postList));
+        this.postList.push(res.data);
       });
       this.dialog = false;
     },
     getPostList() {
       api.posts.getList().then((res) => {
         this.postList = res.data;
+        const postList = JSON.parse(localStorage.getItem("postList")) || [];
+        this.postList.push(...postList);
       });
     },
     showCommentsDetails(id) {
@@ -118,11 +123,14 @@ export default {
         this.comments = res.data;
       });
     },
-    getPostId(id) {
+    getPostId(obj) {
+      if (obj.new) {
+        localStorage.setItem("newPost", JSON.stringify(obj));
+      }
       this.$router.push({
         name: "post-details",
         params: {
-          id: id,
+          id: obj.id,
         },
       });
     },
